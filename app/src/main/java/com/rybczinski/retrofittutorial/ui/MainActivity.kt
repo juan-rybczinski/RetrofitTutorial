@@ -3,12 +3,14 @@ package com.rybczinski.retrofittutorial.ui
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Toast
+import com.rybczinski.retrofittutorial.BuildConfig
 import com.rybczinski.retrofittutorial.R
 import com.rybczinski.retrofittutorial.api.model.GitHubRepo
 import com.rybczinski.retrofittutorial.api.model.User
 import com.rybczinski.retrofittutorial.api.service.GitHubClient
 import com.rybczinski.retrofittutorial.api.service.UserClient
 import okhttp3.OkHttpClient
+import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.*
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -30,10 +32,21 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun sendNetworkRequest(user: User) {
+        // create OkHttp client
+        val okHttpClientBuilder = OkHttpClient.Builder()
+
+        val logging = HttpLoggingInterceptor()
+        logging.level = HttpLoggingInterceptor.Level.BODY
+
+        if (BuildConfig.DEBUG) {
+            okHttpClientBuilder.addInterceptor(logging)
+        }
+
         // Create Retrofit instance
         val builder = Retrofit.Builder()
             .baseUrl(API_BASE_URL)
             .addConverterFactory(GsonConverterFactory.create())
+            .client(okHttpClientBuilder.build())
 
         val retrofit = builder.build()
 
