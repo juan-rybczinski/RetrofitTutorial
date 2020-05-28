@@ -1,18 +1,26 @@
 package com.rybczinski.retrofittutorial.ui
 
+import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.FileUtils
+import android.widget.EditText
 import android.widget.Toast
+import androidx.core.net.toUri
 import com.rybczinski.retrofittutorial.BuildConfig
 import com.rybczinski.retrofittutorial.R
 import com.rybczinski.retrofittutorial.api.model.GitHubRepo
 import com.rybczinski.retrofittutorial.api.model.User
 import com.rybczinski.retrofittutorial.api.service.GitHubClient
 import com.rybczinski.retrofittutorial.api.service.UserClient
-import okhttp3.OkHttpClient
+import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.*
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import retrofit2.converter.gson.GsonConverterFactory
+import java.io.File
 
 class MainActivity : AppCompatActivity() {
 
@@ -23,7 +31,42 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
 //        getGitHubRepos()
-        sendUserPost()
+//        sendUserPost()
+    }
+
+    private fun uploadFile(fileUri: Uri) {
+        val description = "description"
+
+        val descriptionPart = RequestBody.create(MultipartBody.FORM, description)
+
+        val originalFile = File(fileUri.toString())
+        val filePart = RequestBody.create(
+            MediaType.parse(contentResolver.getType(fileUri)),
+            originalFile
+        )
+
+        val file = MultipartBody.Part.createFormData("photo", originalFile.name, filePart)
+
+        // Create retrofit instance
+        val builder = Retrofit.Builder()
+            .baseUrl(API_BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+
+        val retrofit = builder.build()
+
+        // Get client & call object for the request
+        val client = retrofit.create(UserClient::class.java)
+
+        val call = client.uploadPhoto(descriptionPart, file)
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Toast.makeText(this@MainActivity, "no :(", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                Toast.makeText(this@MainActivity, "yeah XD", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 
     private fun sendUserPost() {
