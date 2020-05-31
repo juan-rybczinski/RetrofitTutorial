@@ -171,6 +171,12 @@ class MainActivity : AppCompatActivity() {
             okHttpClientBuilder.addInterceptor(logging)
         }
 
+        okHttpClientBuilder.addInterceptor { chain ->
+            val request = chain.request()
+            val newRequest = request.newBuilder().header("Authentication", "secret-key")
+            chain.proceed(newRequest.build())
+        }
+
         // Create Retrofit instance
         val builder = Retrofit.Builder()
             .baseUrl(API_BASE_URL)
