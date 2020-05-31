@@ -175,7 +175,7 @@ class MainActivity : AppCompatActivity() {
 
         // Get client & call object for the request
         val client = retrofit.create(UserClient::class.java)
-        val call = client.createAccount(user)
+        val call = client.createAccount("Rybczinski Header", user)
         call.enqueue(object : Callback<User> {
             override fun onFailure(call: Call<User>, t: Throwable) {
                 Toast.makeText(this@MainActivity, "error :(", Toast.LENGTH_SHORT).show()

@@ -9,8 +9,15 @@ import retrofit2.http.*
 import java.io.File
 
 interface UserClient {
+    @Headers(
+        "Cache-Controls: max-age=3600",
+        "User-Agent: Android"
+    )
     @POST("user")
-    fun createAccount(@Body user: User): Call<User>
+    fun createAccount(
+        @Header("UserName") userName: String,
+        @Body user: User
+    ): Call<User>
 
     @Multipart
     @POST("upload")
