@@ -206,6 +206,32 @@ class MainActivity : AppCompatActivity() {
         startService(intent)
     }
 
+    private fun getDynamicUrl(user: String) {
+        // Create retrofit instance
+        val builder = Retrofit.Builder()
+            .baseUrl(API_BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+
+        val retrofit = builder.build()
+
+        val profilePhoto = "url"
+
+        // Get client & call object for the request
+        val client = retrofit.create(GitHubClient::class.java)
+        val call = client.getUserProfilePhoto(profilePhoto)
+
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Toast.makeText(this@MainActivity, "error :(", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                Toast.makeText(this@MainActivity, "success XD", Toast.LENGTH_SHORT).show()
+            }
+        })
+
+    }
+
     private fun getGitHubRepos() {
         val httpClient = OkHttpClient.Builder()
         val builder = Retrofit.Builder()
