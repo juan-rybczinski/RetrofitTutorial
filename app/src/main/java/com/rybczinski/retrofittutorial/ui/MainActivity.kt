@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.AsyncTask
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
@@ -70,7 +71,7 @@ class MainActivity : AppCompatActivity() {
         val retrofit = builder.build()
 
         val client = retrofit.create(FileDownloadClient::class.java)
-        val call = client.downloadFile(
+        val call = client.downloadFileStream(
             url
         )
         call.enqueue(object : Callback<ResponseBody> {
@@ -79,8 +80,12 @@ class MainActivity : AppCompatActivity() {
             }
 
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
-                val success = response.body()?.let { writeResponseToDisk(it) } ?: false
-                Toast.makeText(this@MainActivity, "download was successful: $success", Toast.LENGTH_SHORT).show()
+                object : AsyncTask<Void, Void, Void>() {
+                    override fun doInBackground(vararg params: Void?): Void? {
+                        val success = response.body()?.let { writeResponseToDisk(it) } ?: false
+                        return null
+                    }
+                }.execute()
             }
 
         })
