@@ -8,4 +8,9 @@ import retrofit2.http.Url
 interface FileDownloadClient {
     @GET("fileDownloadUrl")
     fun downloadFile(): Call<ResponseBody>
+
+    @GET
+    fun downloadFile(
+        @Url url: String
+    ): Call<ResponseBody>
 }

@@ -57,9 +57,12 @@ class MainActivity : AppCompatActivity() {
 
 //        getGitHubRepos()
 //        sendUserPost()
+
+        var downloadUrl = "downloadUrl"
+        downloadFile(downloadUrl)
     }
 
-    private fun downloadFile() {
+    private fun downloadFile(url: String) {
         // Create retrofit instance
         val builder = Retrofit.Builder()
             .baseUrl(API_BASE_URL)
@@ -67,7 +70,9 @@ class MainActivity : AppCompatActivity() {
         val retrofit = builder.build()
 
         val client = retrofit.create(FileDownloadClient::class.java)
-        val call = client.downloadFile()
+        val call = client.downloadFile(
+            url
+        )
         call.enqueue(object : Callback<ResponseBody> {
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 Toast.makeText(this@MainActivity, "no :(", Toast.LENGTH_SHORT).show()
