@@ -1,17 +1,24 @@
 package com.rybczinski.retrofittutorial.ui
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Environment
 import android.os.FileUtils
+import android.util.Log
 import android.widget.EditText
 import android.widget.Toast
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.rybczinski.retrofittutorial.BuildConfig
 import com.rybczinski.retrofittutorial.R
 import com.rybczinski.retrofittutorial.api.model.GitHubRepo
 import com.rybczinski.retrofittutorial.api.model.User
+import com.rybczinski.retrofittutorial.api.service.FileDownloadClient
 import com.rybczinski.retrofittutorial.api.service.GitHubClient
 import com.rybczinski.retrofittutorial.api.service.UserClient
 import com.rybczinski.retrofittutorial.background.BackgroundService
@@ -23,22 +30,94 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.converter.gson.GsonConverterFactory
-import java.io.File
-import java.io.IOError
-import java.io.IOException
+import java.io.*
 
 class MainActivity : AppCompatActivity() {
 
+    private val TAG = MainActivity::class.java.simpleName
+
     companion object {
         val API_BASE_URL = "https://api.github.com"
+        val MY_PERMMISSIONS_REQUEST = 100
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        if (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(this,
+            arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE),
+            MY_PERMMISSIONS_REQUEST)
+        }
+
 //        getGitHubRepos()
 //        sendUserPost()
+    }
+
+    private fun downloadFile() {
+        // Create retrofit instance
+        val builder = Retrofit.Builder()
+            .baseUrl(API_BASE_URL)
+
+        val retrofit = builder.build()
+
+        val client = retrofit.create(FileDownloadClient::class.java)
+        val call = client.downloadFile()
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Toast.makeText(this@MainActivity, "no :(", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                val success = response.body()?.let { writeResponseToDisk(it) } ?: false
+                Toast.makeText(this@MainActivity, "download was successful: $success", Toast.LENGTH_SHORT).show()
+            }
+
+        })
+    }
+
+    private fun writeResponseToDisk(body: ResponseBody): Boolean {
+        try {
+            val downloadedFile = File(
+                Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                "output.jpg"
+            )
+            var istream: InputStream? = null
+            var ostream: OutputStream? = null
+            try {
+                val fileReader = ByteArray(4096)
+                val fileSize = body.contentLength()
+                var fileSizeDownloaded = 0
+
+                istream = body.byteStream()
+                ostream = FileOutputStream(downloadedFile)
+
+                while (true) {
+                    val read = istream.read(fileReader)
+                    if (read == -1) {
+                        break
+                    }
+                    ostream.write(fileReader, 0, read)
+                    fileSizeDownloaded += read
+                    Log.d(TAG, "file downloaded: $fileSizeDownloaded of $fileSize")
+                }
+                ostream.flush()
+                return true
+            } catch (e: IOException) {
+                return false
+            } finally {
+                istream?.close()
+                ostream?.close()
+            }
+        } catch (e: IOException) {
+            return false
+        }
+
     }
 
     @NotNull
