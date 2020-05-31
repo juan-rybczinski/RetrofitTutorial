@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity() {
 
     companion object {
         val API_BASE_URL = "https://api.github.com"
+        val LOCALHOST_EMUL = "10.0.2.2"
         val MY_PERMMISSIONS_REQUEST = 100
     }
 
