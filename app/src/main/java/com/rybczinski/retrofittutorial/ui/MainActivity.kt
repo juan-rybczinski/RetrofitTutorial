@@ -54,12 +54,11 @@ class MainActivity : AppCompatActivity() {
         return MultipartBody.Part.createFormData(partName, file.name, requestFile)
     }
 
-
     private fun uploadFile(filePath: String) {
-        val description = "description"
-        val photographer = "photographer"
-        val year = "year"
-        val location = "location"
+        val description: String? = "description"
+        val photographer: String? = "photographer"
+        val year: String? = "year"
+        val location: String? = "location"
 
         // Create retrofit instance
         val builder = Retrofit.Builder()
@@ -71,11 +70,14 @@ class MainActivity : AppCompatActivity() {
         // Get client & call object for the request
         val client = retrofit.create(UserClient::class.java)
 
+        val partMap = mutableMapOf<String, RequestBody>()
+        description?.let { partMap["description"] = createPartFromString(description) }
+        photographer?.let { partMap["photographer"] = createPartFromString(photographer) }
+        year?.let { partMap["year"] = createPartFromString(year) }
+        location?.let { partMap["location"] = createPartFromString(location) }
+
         val call = client.uploadPhoto(
-            createPartFromString(description),
-            createPartFromString(photographer),
-            createPartFromString(year),
-            createPartFromString(location),
+            partMap,
             prepareFilePart("photo", Uri.parse(filePath)))
         call.enqueue(object : Callback<ResponseBody> {
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {

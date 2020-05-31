@@ -5,10 +5,7 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
-import retrofit2.http.Body
-import retrofit2.http.Multipart
-import retrofit2.http.POST
-import retrofit2.http.Part
+import retrofit2.http.*
 import java.io.File
 
 interface UserClient {
@@ -18,10 +15,14 @@ interface UserClient {
     @Multipart
     @POST("upload")
     fun uploadPhoto(
-        @Part("description") description: RequestBody,
-        @Part("photographer") photographer: RequestBody,
-        @Part("year") year: RequestBody,
-        @Part("location") location: RequestBody,
+        @PartMap data: Map<String, RequestBody>,
         @Part photo: MultipartBody.Part
+    ): Call<ResponseBody>
+
+    @Multipart
+    @POST("upload")
+    fun uploadPhotos(
+        @Part profile: MultipartBody.Part,
+        @Part panorama: MultipartBody.Part
     ): Call<ResponseBody>
 }
