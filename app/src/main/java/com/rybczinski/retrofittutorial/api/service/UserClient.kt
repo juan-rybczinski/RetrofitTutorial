@@ -25,4 +25,11 @@ interface UserClient {
         @Part profile: MultipartBody.Part,
         @Part panorama: MultipartBody.Part
     ): Call<ResponseBody>
+
+    @Multipart
+    @POST("upload")
+    fun uploadAlbum(
+        @Part("description") description: RequestBody,
+        @Part files: List<MultipartBody.Part>
+    ): Call<ResponseBody>
 }

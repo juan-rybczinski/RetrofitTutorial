@@ -115,6 +115,40 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    private fun uploadAlbum(fileUris: List<Uri>) {
+        val description: String = "description"
+
+        // Create retrofit instance
+        val builder = Retrofit.Builder()
+            .baseUrl(API_BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+
+        val retrofit = builder.build()
+
+        // Get client & call object for the request
+        val client = retrofit.create(UserClient::class.java)
+
+        val parts = mutableListOf<MultipartBody.Part>()
+        fileUris.forEachIndexed { index, uri ->
+            parts.add(prepareFilePart(""+index, uri))
+        }
+
+        val call = client.uploadAlbum(
+            createPartFromString(description),
+            parts
+        )
+
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Toast.makeText(this@MainActivity, "no :(", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                Toast.makeText(this@MainActivity, "yeah XD", Toast.LENGTH_SHORT).show()
+            }
+        })
+    }
+
     private fun sendUserPost() {
         val user = User("Rybczinski", "jhreplay.lee@gmail.com", 34, arrayOf("Android", "Kotlin"))
         sendNetworkRequest(user)
