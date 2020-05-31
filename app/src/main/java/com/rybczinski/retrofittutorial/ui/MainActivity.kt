@@ -1,5 +1,6 @@
 package com.rybczinski.retrofittutorial.ui
 
+import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
@@ -13,6 +14,7 @@ import com.rybczinski.retrofittutorial.api.model.GitHubRepo
 import com.rybczinski.retrofittutorial.api.model.User
 import com.rybczinski.retrofittutorial.api.service.GitHubClient
 import com.rybczinski.retrofittutorial.api.service.UserClient
+import com.rybczinski.retrofittutorial.background.BackgroundService
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import org.jetbrains.annotations.NotNull
@@ -22,10 +24,14 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.File
+import java.io.IOError
+import java.io.IOException
 
 class MainActivity : AppCompatActivity() {
 
-    private val API_BASE_URL = "https://api.github.com"
+    companion object {
+        val API_BASE_URL = "https://api.github.com"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -176,16 +182,22 @@ class MainActivity : AppCompatActivity() {
         // Get client & call object for the request
         val client = retrofit.create(UserClient::class.java)
         val call = client.createAccount("Rybczinski Header", user)
-        call.enqueue(object : Callback<User> {
-            override fun onFailure(call: Call<User>, t: Throwable) {
-                Toast.makeText(this@MainActivity, "error :(", Toast.LENGTH_SHORT).show()
-            }
 
-            override fun onResponse(call: Call<User>, response: Response<User>) {
-                Toast.makeText(this@MainActivity, "User ID: ${response.body()?.id}", Toast.LENGTH_SHORT).show()
-            }
+        // Asynchronous Request
+//        call.enqueue(object : Callback<User> {
+//            override fun onFailure(call: Call<User>, t: Throwable) {
+//                Toast.makeText(this@MainActivity, "error :(", Toast.LENGTH_SHORT).show()
+//            }
+//
+//            override fun onResponse(call: Call<User>, response: Response<User>) {
+//                Toast.makeText(this@MainActivity, "User ID: ${response.body()?.id}", Toast.LENGTH_SHORT).show()
+//            }
+//
+//        })
 
-        })
+        // Synchronous Request
+        val intent = Intent(this, BackgroundService::class.java)
+        startService(intent)
     }
 
     private fun getGitHubRepos() {
