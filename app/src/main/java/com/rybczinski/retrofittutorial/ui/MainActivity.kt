@@ -23,6 +23,7 @@ import com.rybczinski.retrofittutorial.api.service.FileDownloadClient
 import com.rybczinski.retrofittutorial.api.service.GitHubClient
 import com.rybczinski.retrofittutorial.api.service.UserClient
 import com.rybczinski.retrofittutorial.background.BackgroundService
+import com.rybczinski.retrofittutorial.helpers.ErrorUtils
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import org.jetbrains.annotations.NotNull
@@ -41,6 +42,11 @@ class MainActivity : AppCompatActivity() {
         val API_BASE_URL = "https://api.github.com"
         val LOCALHOST_EMUL = "10.0.2.2"
         val MY_PERMMISSIONS_REQUEST = 100
+
+        val builder: Retrofit.Builder = Retrofit.Builder()
+            .baseUrl(API_BASE_URL)
+            .addConverterFactory(GsonConverterFactory.create())
+        val retrofit = builder.build()
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -62,6 +68,68 @@ class MainActivity : AppCompatActivity() {
 
         var downloadUrl = "downloadUrl"
         downloadFile(downloadUrl)
+    }
+
+    private fun executeGetUserRequest(user: String) {
+        val userClient = retrofit.create(UserClient::class.java)
+
+        val call = userClient.getUserByName(user)
+
+        call.enqueue(object : Callback<User> {
+            override fun onFailure(call: Call<User>, t: Throwable) {
+                Toast.makeText(this@MainActivity, "no :(", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onResponse(call: Call<User>, response: Response<User>) {
+                if (response.isSuccessful) {
+                    Toast.makeText(
+                        this@MainActivity,
+                        "server returned user: ${response.body()?.name}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else {
+                    /*
+                    when (response.code()) {
+                        404 -> {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "server returned error: user not found",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        500 -> {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "server returned error: server is broken",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                        else -> {
+                            Toast.makeText(
+                                this@MainActivity,
+                                "server returned error: unknown error",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    }
+                     */
+                    /*
+                    Toast.makeText(
+                        this@MainActivity,
+                        "server returned error: ${response.errorBody().toString()}",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                     */
+                    val apiError = ErrorUtils.parseError(response)
+                    Toast.makeText(
+                        this@MainActivity,
+                        apiError?.message,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+            }
+
+        })
     }
 
     private fun downloadFile(url: String) {

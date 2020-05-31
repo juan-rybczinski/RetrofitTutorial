@@ -39,4 +39,9 @@ interface UserClient {
         @Part("description") description: RequestBody,
         @Part files: List<MultipartBody.Part>
     ): Call<ResponseBody>
+
+    @GET("user/{user}")
+    fun getUserByName(
+        @Path("user") user: String
+    ): Call<User>
 }
