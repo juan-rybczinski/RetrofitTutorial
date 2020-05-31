@@ -15,6 +15,7 @@ import com.rybczinski.retrofittutorial.api.service.GitHubClient
 import com.rybczinski.retrofittutorial.api.service.UserClient
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
+import org.jetbrains.annotations.NotNull
 import retrofit2.*
 import retrofit2.Call
 import retrofit2.Callback
@@ -34,18 +35,31 @@ class MainActivity : AppCompatActivity() {
 //        sendUserPost()
     }
 
-    private fun uploadFile(fileUri: Uri) {
-        val description = "description"
+    @NotNull
+    private fun createPartFromString(string: String): RequestBody {
+        return RequestBody.create(
+            MultipartBody.FORM, string
+        )
+    }
 
-        val descriptionPart = RequestBody.create(MultipartBody.FORM, description)
+    @NotNull
+    private fun prepareFilePart(partName: String, fileUri: Uri): MultipartBody.Part {
+        val file = File(fileUri.toString())
 
-        val originalFile = File(fileUri.toString())
-        val filePart = RequestBody.create(
+        val requestFile = RequestBody.create(
             MediaType.parse(contentResolver.getType(fileUri)),
-            originalFile
+            file
         )
 
-        val file = MultipartBody.Part.createFormData("photo", originalFile.name, filePart)
+        return MultipartBody.Part.createFormData(partName, file.name, requestFile)
+    }
+
+
+    private fun uploadFile(filePath: String) {
+        val description = "description"
+        val photographer = "photographer"
+        val year = "year"
+        val location = "location"
 
         // Create retrofit instance
         val builder = Retrofit.Builder()
@@ -57,7 +71,12 @@ class MainActivity : AppCompatActivity() {
         // Get client & call object for the request
         val client = retrofit.create(UserClient::class.java)
 
-        val call = client.uploadPhoto(descriptionPart, file)
+        val call = client.uploadPhoto(
+            createPartFromString(description),
+            createPartFromString(photographer),
+            createPartFromString(year),
+            createPartFromString(location),
+            prepareFilePart("photo", Uri.parse(filePath)))
         call.enqueue(object : Callback<ResponseBody> {
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 Toast.makeText(this@MainActivity, "no :(", Toast.LENGTH_SHORT).show()

@@ -19,6 +19,9 @@ interface UserClient {
     @POST("upload")
     fun uploadPhoto(
         @Part("description") description: RequestBody,
+        @Part("photographer") photographer: RequestBody,
+        @Part("year") year: RequestBody,
+        @Part("location") location: RequestBody,
         @Part photo: MultipartBody.Part
     ): Call<ResponseBody>
 }
