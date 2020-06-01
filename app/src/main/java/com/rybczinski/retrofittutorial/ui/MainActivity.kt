@@ -29,6 +29,7 @@ import retrofit2.Callback
 import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.io.*
 
 class MainActivity : AppCompatActivity() {
@@ -65,6 +66,33 @@ class MainActivity : AppCompatActivity() {
 
         var downloadUrl = "downloadUrl"
         downloadFile(downloadUrl)
+    }
+
+    private fun executeSendMessage(message: String) {
+        // Create retrofit instance
+        val builder = Retrofit.Builder()
+            .baseUrl(API_BASE_URL)
+            .addConverterFactory(ScalarsConverterFactory.create())
+
+        val retrofit = builder.build()
+
+        val userClient = retrofit.create(UserClient::class.java)
+        val body = RequestBody.create(
+            MediaType.parse("text/plain"),
+            message
+        )
+//        val call = userClient.sendMessage(message)
+        val call = userClient.sendMessage(body)
+        call.enqueue(object : Callback<String> {
+            override fun onFailure(call: Call<String>, t: Throwable) {
+                Toast.makeText(this@MainActivity, "no :(", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onResponse(call: Call<String>, response: Response<String>) {
+                Toast.makeText(this@MainActivity, response.body(), Toast.LENGTH_SHORT).show()
+            }
+
+        })
     }
 
     private fun executeSendFeedbackForm(name: String, email: String, age: String, topics: String) {

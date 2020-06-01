@@ -59,4 +59,10 @@ interface UserClient {
         @FieldMap map: Map<String, String>,
         @Field("topics") topics: List<String>
     ): Call<ResponseBody>
+
+    @POST("message")
+    fun sendMessage(@Body message: String): Call<String>
+
+    @POST("message")
+    fun sendMessage(@Body message: RequestBody): Call<String>
 }
