@@ -6,7 +6,6 @@ import okhttp3.RequestBody
 import okhttp3.ResponseBody
 import retrofit2.Call
 import retrofit2.http.*
-import java.io.File
 
 interface UserClient {
     @Headers(
@@ -44,4 +43,20 @@ interface UserClient {
     fun getUserByName(
         @Path("user") user: String
     ): Call<User>
+
+    @FormUrlEncoded
+    @POST("feedback/")
+    fun sendUserFeedback(
+        @Field("name") name: String,
+        @Field("email") email: String,
+        @Field("age") age: String,
+        @Field("topics") topics: List<String>
+    ): Call<ResponseBody>
+
+    @FormUrlEncoded
+    @POST("feedback/")
+    fun sendUserFeedback(
+        @FieldMap map: Map<String, String>,
+        @Field("topics") topics: List<String>
+    ): Call<ResponseBody>
 }

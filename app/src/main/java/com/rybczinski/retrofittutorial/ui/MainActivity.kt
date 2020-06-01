@@ -5,16 +5,13 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.AsyncTask
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Environment
-import android.os.FileUtils
 import android.util.Log
-import android.widget.EditText
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import com.rybczinski.retrofittutorial.BuildConfig
 import com.rybczinski.retrofittutorial.R
 import com.rybczinski.retrofittutorial.api.model.GitHubRepo
@@ -27,10 +24,10 @@ import com.rybczinski.retrofittutorial.helpers.ErrorUtils
 import okhttp3.*
 import okhttp3.logging.HttpLoggingInterceptor
 import org.jetbrains.annotations.NotNull
-import retrofit2.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import java.io.*
 
@@ -68,6 +65,39 @@ class MainActivity : AppCompatActivity() {
 
         var downloadUrl = "downloadUrl"
         downloadFile(downloadUrl)
+    }
+
+    private fun executeSendFeedbackForm(name: String, email: String, age: String, topics: String) {
+        val userClient = retrofit.create(UserClient::class.java)
+
+        /*
+        val call = userClient.sendUserFeedback(
+            name,
+            email,
+            age,
+            topics.split(",")
+        )
+         */
+
+        val map = mutableMapOf<String, String>()
+        map["name"] = name
+        map["email"] = email
+        map["age"] = age
+        val call = userClient.sendUserFeedback(
+            map,
+            topics.split(",")
+        )
+
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Toast.makeText(this@MainActivity, "no :(", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                Toast.makeText(this@MainActivity, "yeah XD", Toast.LENGTH_SHORT).show()
+            }
+
+        })
     }
 
     private fun executeGetUserRequest(user: String) {
