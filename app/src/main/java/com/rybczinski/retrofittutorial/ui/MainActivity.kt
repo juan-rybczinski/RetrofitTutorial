@@ -68,6 +68,51 @@ class MainActivity : AppCompatActivity() {
         downloadFile(downloadUrl)
     }
 
+    private fun executeSearch() {
+        val apiKey = "super-secret"
+
+        // Create retrofit instance
+        val okHttpClient = OkHttpClient.Builder()
+            .addInterceptor {
+                val original = it.request()
+                val httpUrl = original.url()
+
+                val newHttpUrl = httpUrl.newBuilder().addQueryParameter("apikey", apiKey).build()
+
+                val requestBuilder = original.newBuilder().url(newHttpUrl)
+
+                val request = requestBuilder.build()
+                it.proceed(request)
+            }
+        val builder = Retrofit.Builder()
+            .baseUrl(API_BASE_URL)
+            .client(okHttpClient)
+            .addConverterFactory(ScalarsConverterFactory.create())
+
+        val retrofit = builder.build()
+
+        val userClient = retrofit.create(UserClient::class.java)
+
+        val queryMap = mutableMapOf<String, Any>()
+        queryMap["id"] = 4
+        queryMap["order"] = "asc"
+
+        val call = userClient.searchForUser(
+            12,
+            queryMap
+        )
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Toast.makeText(this@MainActivity, "no :(", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                Toast.makeText(this@MainActivity, "yeah XD", Toast.LENGTH_SHORT).show()
+            }
+
+        })
+    }
+
     private fun executeSendMessage(message: String) {
         // Create retrofit instance
         val builder = Retrofit.Builder()

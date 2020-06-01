@@ -65,4 +65,17 @@ interface UserClient {
 
     @POST("message")
     fun sendMessage(@Body message: RequestBody): Call<String>
+
+    @GET("user")
+    fun searchForUser(
+        @Query("id") id: Int,
+        @Query("sort") order: String,
+        @Query("page") page: Int
+    ): Call<ResponseBody>
+
+    @GET("user")
+    fun searchForUser(
+        @Query("id") id: Int,
+        @QueryMap queries: Map<String, Any>
+    ): Call<ResponseBody>
 }
