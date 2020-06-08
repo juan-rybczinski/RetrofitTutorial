@@ -15,6 +15,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.rybczinski.retrofittutorial.BuildConfig
 import com.rybczinski.retrofittutorial.R
+import com.rybczinski.retrofittutorial.api.model.AccessToken
 import com.rybczinski.retrofittutorial.api.model.GitHubRepo
 import com.rybczinski.retrofittutorial.api.model.Login
 import com.rybczinski.retrofittutorial.api.model.User
@@ -49,6 +50,10 @@ class MainActivity : AppCompatActivity() {
         val retrofit = builder.build()
     }
 
+    val clientId = "clientId"
+    val clientSecret = "clientSecret"
+    val redirectUrl = "rybczinski://callback"
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -66,8 +71,38 @@ class MainActivity : AppCompatActivity() {
 //        getGitHubRepos()
 //        sendUserPost()
 
-        var downloadUrl = "downloadUrl"
-        downloadFile(downloadUrl)
+//        var downloadUrl = "downloadUrl"
+//        downloadFile(downloadUrl)
+
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/login.oauth.authorized?client_id=$clientId&scope=repo&redirect_url=$redirectUrl"))
+        startActivity(intent)
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val uri = intent.data
+        uri?.let {
+            if (uri.toString().startsWith(redirectUrl)) {
+                val code = uri.getQueryParameter("code")
+
+                val client = retrofit.create(GitHubClient::class.java)
+                code?.let {
+                    val call = client.getAccessToken(clientId, clientSecret, it)
+                    call.enqueue(object : Callback<AccessToken> {
+                        override fun onFailure(call: Call<AccessToken>, t: Throwable) {
+                            Toast.makeText(this@MainActivity, "no", Toast.LENGTH_SHORT).show()
+                        }
+
+                        override fun onResponse(
+                            call: Call<AccessToken>,
+                            response: Response<AccessToken>
+                        ) {
+                            Toast.makeText(this@MainActivity, "yay", Toast.LENGTH_SHORT).show()
+                        }
+                    })
+                }
+            }
+        }
     }
 
     private fun executeSearch() {
@@ -419,7 +454,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun sendUserPost() {
-        val user = User("Rybczinski", "jhreplay.lee@gmail.com", 34, arrayOf("Android", "Kotlin"))
+        val user = User("Rybczinski", "jhreplay.lee@gmail.com", "", 34, arrayOf("Android", "Kotlin"))
         sendNetworkRequest(user)
     }
 
