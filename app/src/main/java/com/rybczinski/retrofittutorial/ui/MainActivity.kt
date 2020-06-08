@@ -7,6 +7,7 @@ import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
 import android.os.Environment
+import android.util.Base64
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -520,5 +521,29 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(this@MainActivity, "success XD", Toast.LENGTH_SHORT).show()
             }
         })
+    }
+
+    class UserLoginTask(private val mEmail: String, private val mPassword: String) :
+        AsyncTask<Void, Void, Boolean>() {
+        override fun doInBackground(vararg params: Void?): Boolean {
+            val userClient = retrofit.create(UserClient::class.java)
+
+            val userName = mEmail
+            val password = mPassword
+            val base = "$userName : $password"
+            val authHeader = "Basic ${Base64.encodeToString(base.toByteArray(), Base64.NO_WRAP)}"
+            val call = userClient.getUser(authHeader)
+
+            try {
+                val response = call.execute()
+                if (response.isSuccessful) {
+                    return true
+                }
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+            return false
+        }
+
     }
 }

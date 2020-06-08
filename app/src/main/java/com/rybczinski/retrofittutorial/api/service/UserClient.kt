@@ -78,4 +78,7 @@ interface UserClient {
         @Query("id") id: Int,
         @QueryMap queries: Map<String, Any>
     ): Call<ResponseBody>
+
+    @GET("basic")
+    fun getUser(@Header("Authorization") authHeader: String): Call<User>
 }
