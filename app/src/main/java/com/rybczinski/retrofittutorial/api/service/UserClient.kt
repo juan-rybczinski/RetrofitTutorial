@@ -1,5 +1,6 @@
 package com.rybczinski.retrofittutorial.api.service
 
+import com.rybczinski.retrofittutorial.api.model.Login
 import com.rybczinski.retrofittutorial.api.model.User
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
@@ -81,4 +82,10 @@ interface UserClient {
 
     @GET("basic")
     fun getUser(@Header("Authorization") authHeader: String): Call<User>
+
+    @POST("login")
+    fun login(@Body login: Login): Call<User>
+
+    @GET("secretinfo")
+    fun getSecret(@Header("Authorization") authToken: String): Call<ResponseBody>
 }

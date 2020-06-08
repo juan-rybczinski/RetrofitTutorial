@@ -3,6 +3,7 @@ package com.rybczinski.retrofittutorial.api.model
 class User(
     val name: String,
     val email: String,
+    val token: String,
     val age: Int,
     val topics: Array<String>
 ){

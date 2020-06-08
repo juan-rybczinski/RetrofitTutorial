@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat
 import com.rybczinski.retrofittutorial.BuildConfig
 import com.rybczinski.retrofittutorial.R
 import com.rybczinski.retrofittutorial.api.model.GitHubRepo
+import com.rybczinski.retrofittutorial.api.model.Login
 import com.rybczinski.retrofittutorial.api.model.User
 import com.rybczinski.retrofittutorial.api.service.FileDownloadClient
 import com.rybczinski.retrofittutorial.api.service.GitHubClient
@@ -87,7 +88,7 @@ class MainActivity : AppCompatActivity() {
             }
         val builder = Retrofit.Builder()
             .baseUrl(API_BASE_URL)
-            .client(okHttpClient)
+            .client(okHttpClient.build())
             .addConverterFactory(ScalarsConverterFactory.create())
 
         val retrofit = builder.build()
@@ -546,4 +547,46 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+
+    var token: String? = null
+    private val userClient = retrofit.create(UserClient::class.java)
+
+    private fun login() {
+        val login = Login("username", "password")
+        val call = userClient.login(login)
+        call.enqueue(object : Callback<User> {
+            override fun onFailure(call: Call<User>, t: Throwable) {
+                Toast.makeText(this@MainActivity, "error :(", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onResponse(call: Call<User>, response: Response<User>) {
+                if (response.isSuccessful) {
+                    token = response.body()?.token
+                    Toast.makeText(this@MainActivity, token, Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this@MainActivity, "login not correct :(", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+        })
+    }
+
+    private fun getSecret() {
+        val call = token?.let { userClient.getSecret(it) }
+        call?.enqueue(object : Callback<ResponseBody> {
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Toast.makeText(this@MainActivity, "error :(", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                if (response.isSuccessful) {
+                    Toast.makeText(this@MainActivity, response.body().toString(), Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this@MainActivity, "token is not correct :(", Toast.LENGTH_SHORT).show()
+                }
+            }
+
+        })
+    }
+
 }
