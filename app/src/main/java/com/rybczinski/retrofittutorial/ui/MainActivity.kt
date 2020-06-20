@@ -78,6 +78,25 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
+    fun executeUserSearch() {
+        val userClient = retrofit.create(UserClient::class.java)
+        val call =  userClient.searchForUsers(
+            listOf(21, 22),
+            null,
+            null
+        )
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Toast.makeText(this@MainActivity, "no", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                Toast.makeText(this@MainActivity, "yay", Toast.LENGTH_SHORT).show()
+            }
+
+        })
+    }
+
     override fun onResume() {
         super.onResume()
         val uri = intent.data

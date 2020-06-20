@@ -88,4 +88,25 @@ interface UserClient {
 
     @GET("secretinfo")
     fun getSecret(@Header("Authorization") authToken: String): Call<ResponseBody>
+
+    @GET("users")
+    fun searchForUsers(
+        @Query("id")id: Int,
+        @Query("order")order: String,
+        @Query("page")page: Int
+    ): Call<ResponseBody>
+
+    @GET("users")
+    fun searchForUsers(
+        @Query("id")id: Int?,
+        @Query("order")order: String?,
+        @Query("page")page: Int?
+    ): Call<ResponseBody>
+
+    @GET("users")
+    fun searchForUsers(
+        @Query("id")id: List<Int>,
+        @Query("order")order: String?,
+        @Query("page")page: Int?
+    ): Call<ResponseBody>
 }
