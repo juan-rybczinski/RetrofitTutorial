@@ -15,12 +15,10 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.rybczinski.retrofittutorial.BuildConfig
 import com.rybczinski.retrofittutorial.R
-import com.rybczinski.retrofittutorial.api.model.AccessToken
-import com.rybczinski.retrofittutorial.api.model.GitHubRepo
-import com.rybczinski.retrofittutorial.api.model.Login
-import com.rybczinski.retrofittutorial.api.model.User
+import com.rybczinski.retrofittutorial.api.model.*
 import com.rybczinski.retrofittutorial.api.service.FileDownloadClient
 import com.rybczinski.retrofittutorial.api.service.GitHubClient
+import com.rybczinski.retrofittutorial.api.service.GithubGistService
 import com.rybczinski.retrofittutorial.api.service.UserClient
 import com.rybczinski.retrofittutorial.background.BackgroundService
 import com.rybczinski.retrofittutorial.helpers.ErrorUtils
@@ -33,6 +31,7 @@ import retrofit2.Response
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
+import retrofit2.converter.simplexml.SimpleXmlConverterFactory
 import java.io.*
 
 class MainActivity : AppCompatActivity() {
@@ -76,6 +75,28 @@ class MainActivity : AppCompatActivity() {
 
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/login.oauth.authorized?client_id=$clientId&scope=repo&redirect_url=$redirectUrl"))
         startActivity(intent)
+    }
+
+    fun getGithubGist() {
+        val builder: Retrofit.Builder = Retrofit.Builder()
+            .baseUrl(API_BASE_URL)
+            .addConverterFactory(SimpleXmlConverterFactory.create())
+        val retrofit = builder.build()
+
+        val gistService = retrofit.create(GithubGistService::class.java)
+        val call = gistService.getGithubGist()
+
+        call.enqueue(object : Callback<Task> {
+            override fun onFailure(call: Call<Task>, t: Throwable) {
+                Toast.makeText(this@MainActivity, "no", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onResponse(call: Call<Task>, response: Response<Task>) {
+                val task = response.body()
+                Toast.makeText(this@MainActivity, "yay", Toast.LENGTH_SHORT).show()
+            }
+
+        })
     }
 
     fun executeUserSearch() {
