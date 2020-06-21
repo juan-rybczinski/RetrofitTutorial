@@ -334,7 +334,11 @@ class MainActivity : AppCompatActivity() {
         )
         call.enqueue(object : Callback<ResponseBody> {
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                Toast.makeText(this@MainActivity, "no :(", Toast.LENGTH_SHORT).show()
+                if (call.isCanceled) {
+                    Toast.makeText(this@MainActivity, "request canceled", Toast.LENGTH_SHORT).show()
+                } else {
+                    Toast.makeText(this@MainActivity, "no :(", Toast.LENGTH_SHORT).show()
+                }
             }
 
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
@@ -347,6 +351,10 @@ class MainActivity : AppCompatActivity() {
             }
 
         })
+
+        fun cancelDownload() {
+            call.cancel()
+        }
     }
 
     private fun writeResponseToDisk(body: ResponseBody): Boolean {
