@@ -13,6 +13,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import com.google.gson.GsonBuilder
 import com.rybczinski.retrofittutorial.BuildConfig
 import com.rybczinski.retrofittutorial.R
 import com.rybczinski.retrofittutorial.api.model.*
@@ -33,6 +34,8 @@ import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory
 import java.io.*
+import java.text.DateFormat
+import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
 
@@ -75,6 +78,36 @@ class MainActivity : AppCompatActivity() {
 
         val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/login.oauth.authorized?client_id=$clientId&scope=repo&redirect_url=$redirectUrl"))
         startActivity(intent)
+    }
+
+    fun callWithTimeouts() {
+        val okHttpClient = OkHttpClient.Builder()
+            .connectTimeout(1, TimeUnit.MINUTES)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .writeTimeout(5, TimeUnit.SECONDS)
+            .build()
+
+        val gson = GsonBuilder().serializeNulls().setDateFormat(DateFormat.LONG).create()
+
+        val builder = Retrofit.Builder()
+            .baseUrl(API_BASE_URL)
+            .client(okHttpClient)
+            . addConverterFactory(GsonConverterFactory.create(gson))
+
+        val retrofit = builder.build()
+
+        val githubClient = retrofit.create(GitHubClient::class.java)
+        val call = githubClient.getUserProfilePhoto("api_url")
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                Toast.makeText(this@MainActivity, "no", Toast.LENGTH_SHORT).show()
+            }
+
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                Toast.makeText(this@MainActivity, "yay", Toast.LENGTH_SHORT).show()
+            }
+
+        })
     }
 
     fun getGithubGist() {
