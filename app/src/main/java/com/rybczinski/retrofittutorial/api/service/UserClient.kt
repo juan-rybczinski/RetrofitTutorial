@@ -109,4 +109,10 @@ interface UserClient {
         @Query("order")order: String?,
         @Query("page")page: Int?
     ): Call<ResponseBody>
+
+    @GET("users")
+    fun searchForUsers(
+        @Query("id")id: Int,
+        @QueryMap map: Map<String, Any>
+    ): Call<ResponseBody>
 }

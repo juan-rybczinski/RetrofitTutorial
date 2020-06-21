@@ -80,11 +80,20 @@ class MainActivity : AppCompatActivity() {
 
     fun executeUserSearch() {
         val userClient = retrofit.create(UserClient::class.java)
+
+        val map = mutableMapOf<String, Any>()
+        map["sort"] = "asc"
+        map["page"] = 12
+
+        if (BuildConfig.DEBUG) {
+            map["debug"] = true
+        }
+
         val call =  userClient.searchForUsers(
-            listOf(21, 22),
-            null,
-            null
+            12,
+            map
         )
+
         call.enqueue(object : Callback<ResponseBody> {
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 Toast.makeText(this@MainActivity, "no", Toast.LENGTH_SHORT).show()
