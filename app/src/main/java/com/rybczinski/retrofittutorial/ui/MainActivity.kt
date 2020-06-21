@@ -16,6 +16,7 @@ import androidx.core.content.ContextCompat
 import com.google.gson.GsonBuilder
 import com.rybczinski.retrofittutorial.BuildConfig
 import com.rybczinski.retrofittutorial.R
+import com.rybczinski.retrofittutorial.api.ServiceGenerator
 import com.rybczinski.retrofittutorial.api.model.*
 import com.rybczinski.retrofittutorial.api.service.FileDownloadClient
 import com.rybczinski.retrofittutorial.api.service.GitHubClient
@@ -595,17 +596,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun getDynamicUrl(user: String) {
-        // Create retrofit instance
-        val builder = Retrofit.Builder()
-            .baseUrl(API_BASE_URL)
-            .addConverterFactory(GsonConverterFactory.create())
+        val profilePhoto = "api_url"
 
-        val retrofit = builder.build()
-
-        val profilePhoto = "url"
-
-        // Get client & call object for the request
-        val client = retrofit.create(GitHubClient::class.java)
+        val client = ServiceGenerator.createService(GitHubClient::class.java)
         val call = client.getUserProfilePhoto(profilePhoto)
 
         call.enqueue(object : Callback<ResponseBody> {
